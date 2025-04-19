@@ -1,6 +1,7 @@
-import { Form, Row, Col, Button } from "react-bootstrap";
+import { Form, Row, Col, Button, ButtonGroup } from "react-bootstrap";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import Card from 'react-bootstrap/Card';
+import { TiCancel } from "react-icons/ti";
 import InputGroup from 'react-bootstrap/InputGroup';
 import { FaCalendarAlt } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,36 +13,36 @@ import * as coursesClient from "../client";
 import * as quizzesClient from "./client";
 import { BsThreeDotsVertical } from "react-icons/bs";
 
-export default function AssignmentEditor() {
+export default function QuizEditor() {
   const { cid, aid } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { assignments } = useSelector((state: any) => state.assignmentsReducer);
-  const assignment = assignments.find((a:any) => a._id === aid);
+  const { quizzes } = useSelector((state: any) => state.quizzesReducer);
+  const quiz = quizzes.find((a:any) => a._id === aid);
 
-  const [name, setName] = useState(assignment?.name || "");
-  const [title, setTitle] = useState(assignment?.title || "");
-  const [description, setDescription] = useState(assignment?.description || "");
-  const [points, setPoints] = useState(assignment?.points || 100);
-  const [dueDate, setDueDate] = useState(assignment?.dueDate || "");
-  const [availableDate, setAvailableDate] = useState(assignment?.availableDate || "");
-  const [availableUntil, setAvailableUntil] = useState(assignment?.availableUntil || "");
-  const [assignmentGroup, setAssignmentGroup] = useState(assignment?.assignmentGroup || "1");
-  const [gradeDisplay, setGradeDisplay] = useState(assignment?.gradeDisplay || "1");
-  const [submission, setSubmission] = useState(assignment?.submission || "1");
-  const initialEntry = {
-    textEntry: false,
-    websiteURL: false,
-    mediaRecordings: false,
-    studentAnnotation: false,
-    fileUploads: false,
-  }
-  const [entry, setEntry] = useState(assignment?.entry || initialEntry);
+  const [title, setTitle] = useState(quiz?.title || "");
+  const [activeTab, setActiveTab] = useState("details");
+  const [description, setDescription] = useState(quiz?.description || "");
+  const [points, setPoints] = useState(quiz?.points || 100);
+  const [dueDate, setDueDate] = useState(quiz?.dueDate || "");
+  const [availableDate, setAvailableDate] = useState(quiz?.availableDate || "");
+  const [availableUntil, setAvailableUntil] = useState(quiz?.availableUntil || "");
+  const [quizType, setQuizType] = useState(quiz?.quizType || "1");
+  const [assignmentGroup, setAssignmentGroup] = useState(quiz?.assignmentGroup || "1");
+  const [shuffle, setShuffle] = useState(quiz?.shuffle || "true");
+  const [timeLimit, setTimeLimit] = useState(quiz?.timeLimit || 20);
+  const [multipleAttempt, setMultipleAttempt] = useState(quiz?.multipleAttempt || "false");
+  const [questionType, setQuestionType] = useState(quiz?.questionType || "Multiple Choice");
+
+
+
+  const [gradeDisplay, setGradeDisplay] = useState(quiz?.gradeDisplay || "1");
+  const [submission, setSubmission] = useState(quiz?.submission || "1");
+  const [questions, setQuestions] = useState<any[]>([]);
   
 
   useEffect(() => {
     if (aid === "new") {
-      setName("")
       setTitle("");
       setDescription("");
       setPoints(100);
@@ -49,35 +50,34 @@ export default function AssignmentEditor() {
       setAvailableDate("");
       setAvailableUntil("");
       setAssignmentGroup("1");
+      setQuizType("1");
+      setShuffle("true");
+      setTimeLimit("20")
+      setMultipleAttempt("false");
+      setQuestionType("Multiple Choice")
       setGradeDisplay("1");
       setSubmission("1");
-      setEntry(initialEntry);
     }
   }, [aid]);
-
-  const handleEntryChange = (option:any) => {
-    setEntry((prevEntry:any) => ({
-      ...prevEntry,
-      [option]: !prevEntry[option],
-    }));
-  };
 
   const handleSave = async () => {
     if (!cid) return;
     const quizData = {
       _id: aid === "new" ? uuidv4() : aid,
-      name,
       title,
       description,
       points,
       dueDate: dueDate,
       availableDate: availableDate,
       availableUntil: availableUntil,
-      course: cid,
       gradeDisplay: gradeDisplay,
+      quizType: quizType,
+      Shuffle: shuffle,
+      timeLimit: timeLimit,
+      multipleAttempt: multipleAttempt,
+      questionType: questionType,
       assignmentGroup: assignmentGroup,
-      submission: submission,
-      entry: entry,
+      submission: submission
     };
 
     if (aid === "new") {
@@ -95,53 +95,102 @@ export default function AssignmentEditor() {
     navigate(`/Kambaz/Courses/${cid}/Quizzes`);
   };
 
+  const handleShuffleChange = () => {
+    setShuffle((prevShuffle: boolean) => !prevShuffle);
+  };
+
+  const handleAttemptChange = () => {
+    setMultipleAttempt((prevAttempt: boolean) => !prevAttempt);
+  };
+
+  const handleTimeLimitChange = () => {
+    setTimeLimit((prevTimeLimit: boolean) => !prevTimeLimit);
+  };
+
+  const addNewQuestion = () => {
+    const newQuestion = {
+      id: uuidv4(),
+      type: "multiple_choice",
+      points: 1,
+      text: "",
+      options: ["Option 1", "Option 2"],
+      isEditing: true,
+    };
+    setQuestions([...questions, newQuestion]);
+  };
+
   return (
-    <div >
-      <div id="wd-quizzes-controls" className="text-nowrap">
-      <Button variant="secondary" size="lg" className="me-1 float-end">
-        <BsThreeDotsVertical size={200} />
-      </Button>
-      </div>
+    <div>
       <div style={{ width: '1100px' }}>
-        <Form.Group className="mb-3 col-6" controlId="AssignmentName">
-          <Form.Label className="mtext-muted">Assignment Name</Form.Label>
+      <div style={{ marginLeft: "350px" }}>
+        <span>Points {points}</span>
+        <TiCancel style={{ marginLeft: "30px" }}/>
+          Not Published 
+        <Button style={{ marginLeft: "30px" }}>
+          <BsThreeDotsVertical size={20} />
+        </Button>
+      </div>
+      <hr className="m-3" style={{ width: "600px" }} />
+
+      <ButtonGroup className="mb-3">
+        <Button
+          variant={activeTab === "details" ? "primary" : "outline-primary"}
+          onClick={() => setActiveTab("details")}
+        >
+          Details
+        </Button>
+        <Button
+          variant={activeTab === "questions" ? "primary" : "outline-primary"}
+          onClick={() => setActiveTab("questions")}
+        >
+          Questions
+        </Button>
+      </ButtonGroup>
+
+
+      {activeTab === "details" && (
+        <div>
+          <Form.Group className="mb-3 col-6" controlId="QuizName">
           <Form.Control
             type="text"
-            placeholder="Please input Assignment Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <Form.Label className="mtext-muted">Assignment Title</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Please input Assignment Name"
+            placeholder="Please input Quiz Name"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
-        </Form.Group>
-        <Form.Group className="mb-3 col-6" controlId="AssignmentDescription">
+          </Form.Group>
+          <p>Quiz Instructions:</p>
+          <div className="d-flex gap-3">
+            <p>Edit</p>
+            <p>View</p>
+            <p>Insert</p>
+            <p>Format</p>
+            <p>Tools</p>
+            <p>Table</p>
+          </div>
+
+          <Form.Group className="mb-3 col-6" controlId="QuizDescription">
           <Form.Control
             as="textarea"
             rows={10}
-            placeholder="Please write assignment description"
+            placeholder="Please write quiz description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
         </Form.Group>
-      </div>
 
-      <div style={{ width: "1100px" }}>
         <Row className="mb-3">
-          <Col className="col-2">
-            <Form.Label className="col-form-label float-end">Points</Form.Label>
-          </Col>
-          <Col className="col-4">
-            <Form.Control
-              type="number"
-              value={points}
-              onChange={(e) => setPoints(parseInt(e.target.value))}
-            />
-          </Col>
+                <Col className="col-2">
+                    <Form.Label className="col-form-label float-end">Quiz Type</Form.Label>
+                </Col>
+                <Col className="col-4">
+                    <Form.Select value={quizType} 
+                     onChange={(e) => setQuizType(e.target.value)}>
+                        <option value="1">Graded Quiz</option>
+                        <option value="2">Practice Quiz</option>
+                        <option value="3">Graded Survey</option>
+                        <option value="4">Ungraded Survey</option>
+                    </Form.Select>
+                </Col>
         </Row>
 
         <Row className="mb-3">
@@ -154,56 +203,36 @@ export default function AssignmentEditor() {
                         <option value="1">Assignment</option>
                         <option value="2">Quiz</option>
                         <option value="3">Exam</option>
+                        <option value="4">Project</option>
                     </Form.Select>
                 </Col>
         </Row>
 
-        <Row className="mb-3">
-            <Col className="col-2 float-end">
-                <Form.Label className="col-form-label float-end">Display Grade as</Form.Label>
-            </Col>
-            <Col className="col-4">
-                <Form.Select value={gradeDisplay}
-                 onChange={(e) => setGradeDisplay(e.target.value)}>
-                    <option value="1">Percentage</option>
-                    <option value="2">Points</option>
-                    <option value="3">Level</option>
-                </Form.Select>
-            </Col>
-        </Row>
+        <p>Options</p>
 
-        <Row className="mb-3">
-            <Col className="col-2">
-                <Form.Label className="col-form-label float-end">Submission Type</Form.Label>
-            </Col>
-            <Col className="col-4">
-                <Card className="p-2">
-                    <Form.Select className="mb-3" value={submission}
-                     onChange={(e) => setSubmission(e.target.value)}>
-                        <option value="1">Online</option>
-                        <option value="2">Offline</option>
-                        <option value="3">No Submisiion needed</option>
-                    </Form.Select>
-                    <h6 className="fw-bold mb-3">Online Entry Options</h6>
-                    <Form.Check className="mb-3" label="Text Entry"
-                    checked={entry.textEntry} 
-                    onChange={() => handleEntryChange("textEntry")}/>
-                    <Form.Check className="mb-3" label="Website URL"
-                    checked={entry.websiteURL} 
-                    onChange={() => handleEntryChange("websiteURL")}/>
-                    <Form.Check className="mb-3" label="Media Recordings"
-                    checked={entry.mediaRecordings} 
-                    onChange={() => handleEntryChange("mediaRecordings")}/>
-                    <Form.Check className="mb-3" label="Student Annotation"
-                    checked={entry.studentAnnotation} 
-                    onChange={() => handleEntryChange("studentAnnotation")}/>
-                    <Form.Check className="mb-3" label="File Uploads"
-                    checked={entry.fileUploads} 
-                    onChange={() => handleEntryChange("fileUploads")}/>
+          <Form.Check
+            type="checkbox"
+            id="shuffle-checkbox"
+            label={`Shuffle Answers`}
+            checked={shuffle}
+            onChange={handleShuffleChange}
+          />
 
-                </Card>
-            </Col>
-        </Row>
+          <Form.Check
+            type="checkbox"
+            id="timeLimit-checkbox"
+            label={`Time Limit`}
+            checked={timeLimit}
+            onChange={handleTimeLimitChange}
+          />
+
+          <Form.Check
+            type="checkbox"
+            id="multipleAttempts-checkbox"
+            label={`Allow Multiple Attempts`}
+            checked={multipleAttempt}
+            onChange={handleAttemptChange}
+          />
 
         <Row className="mb-3">
           <Col className="col-2">
@@ -218,7 +247,7 @@ export default function AssignmentEditor() {
                   type="text"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  placeholder="Assignment Due Date"
+                  placeholder="Quiz Due Date"
                 />
                 <InputGroup.Text><FaCalendarAlt className="fs-6" /></InputGroup.Text>
               </InputGroup>
@@ -254,26 +283,79 @@ export default function AssignmentEditor() {
         </Row>
 
         <hr className="m-3" style={{ width: "600px" }} />
+        
+                <Row className="mb-3">
+                  <Col className="col-4"></Col>
+                  <Col className="col-2">
+                    <Link
+                      to={`/Kambaz/Courses/${cid}/Quizzes`}
+                      className="btn btn-light text-decoration-none me-3"
+                      onClick={handleCancel}
+                    >
+                      Cancel
+                    </Link>
+                    <Link
+                      to={`/Kambaz/Courses/${cid}/Quizzes`}
+                      className="btn btn-danger text-decoration-none"
+                      onClick={handleSave}
+                    >
+                      Save
+                    </Link>
+                  </Col>
+                </Row>
+        </div>
+      )}
 
-        <Row className="mb-3">
-          <Col className="col-4"></Col>
-          <Col className="col-2">
-            <Link
-              to={`/Kambaz/Courses/${cid}/Assignments`}
-              className="btn btn-light text-decoration-none me-3"
-              onClick={handleCancel}
-            >
-              Cancel
-            </Link>
-            <Link
-              to={`/Kambaz/Courses/${cid}/Assignments`}
-              className="btn btn-danger text-decoration-none"
-              onClick={handleSave}
-            >
-              Save
-            </Link>
-          </Col>
-        </Row>
+      {activeTab === "questions" && (
+        <div>
+          <button className="btn btn-secondary" onClick={addNewQuestion}>
+            + New Question
+          </button>
+
+          <Row className="mb-3">
+                  <Col className="col-4"></Col>
+                  <Col className="col-2">
+                    <Link
+                      to={`/Kambaz/Courses/${cid}/Quizzes`}
+                      className="btn btn-light text-decoration-none me-3"
+                      onClick={handleCancel}
+                    >
+                      Cancel
+                    </Link>
+                    <Link
+                      to={`/Kambaz/Courses/${cid}/Quizzes`}
+                      className="btn btn-danger text-decoration-none"
+                      onClick={handleSave}
+                    >
+                      Save
+                    </Link>
+                  </Col>
+            </Row>
+
+
+            <Card>
+            <Form.Group className="mb-3" controlId="QuizName">
+              <div className="d-flex gap-2">
+                <Form.Control
+                type="text"
+                placeholder="Input 1"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                />
+                <Form.Control
+                type="text"
+                placeholder="Input 2"
+                value={questionType}
+                onChange={(e) => setQuestionType(e.target.value)}
+                />
+              </div>
+            </Form.Group>
+            </Card>
+
+
+
+        </div>
+      )}
       </div>
     </div>
   );

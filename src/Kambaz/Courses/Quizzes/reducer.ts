@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 const initialState = {
   quizzes: [],
+  currentUser: null,
 };
 const quizzesSlice = createSlice({
   name: "quizzes",
@@ -11,6 +12,10 @@ const quizzesSlice = createSlice({
   reducers: {
     setQuizzes: (state, action) => {
       state.quizzes = action.payload;
+    },
+
+    setCurrentUser: (state, action) => {
+      state.currentUser = action.payload;
     },
 
     addQuiz: (state, { payload: quiz }) => {

@@ -19,7 +19,7 @@ import { useSelector, useDispatch } from "react-redux";
 
 export default function Quizzes() {
   const { cid } = useParams();
-  const { quizzes } = useSelector((state: any) => state.quizzesReducer);
+  const { quizzes, currentUser } = useSelector((state: any) => state.quizzesReducer);
   const dispatch = useDispatch();
 
   const removeQuiz = async (QuizId: string) => {
@@ -36,10 +36,8 @@ export default function Quizzes() {
     fetchQuizzes();
   }, []);
 
-    
+  if (currentUser.role === "FACULTY"){    
   return (
-
-
     <div id="wd-Quizzes d-flex" >
     <QuizzesControls />
       <ListGroup className="rounded-0" id="wd-Quizzes">
@@ -90,6 +88,9 @@ export default function Quizzes() {
       </ListGroup>
   </div>
     );}
+    else if (currentUser.role === "STUDENT"){
+}
+}
 
 
 
