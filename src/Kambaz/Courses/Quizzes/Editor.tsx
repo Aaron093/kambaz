@@ -27,11 +27,11 @@ export default function QuizEditor() {
   const [dueDate, setDueDate] = useState(quiz?.dueDate || "");
   const [availableDate, setAvailableDate] = useState(quiz?.availableDate || "");
   const [availableUntil, setAvailableUntil] = useState(quiz?.availableUntil || "");
-  const [quizType, setQuizType] = useState(quiz?.quizType || "1");
+  const [quizType, setQuizType] = useState(quiz?.quizType || "Graded Quiz");
   const [assignmentGroup, setAssignmentGroup] = useState(quiz?.assignmentGroup || "1");
-  const [shuffle, setShuffle] = useState(quiz?.shuffle || "true");
+  const [shuffle, setShuffle] = useState(quiz?.shuffle || "Yes");
   const [timeLimit, setTimeLimit] = useState(quiz?.timeLimit || 20);
-  const [multipleAttempt, setMultipleAttempt] = useState(quiz?.multipleAttempt || "false");
+  const [multipleAttempt, setMultipleAttempt] = useState(quiz?.multipleAttempt || "No");
   const [questionType, setQuestionType] = useState(quiz?.questionType || "Multiple Choice");
 
 
@@ -50,10 +50,10 @@ export default function QuizEditor() {
       setAvailableDate("");
       setAvailableUntil("");
       setAssignmentGroup("1");
-      setQuizType("1");
-      setShuffle("true");
+      setQuizType("Graded Quiz");
+      setShuffle("Yes");
       setTimeLimit("20")
-      setMultipleAttempt("false");
+      setMultipleAttempt("No");
       setQuestionType("Multiple Choice")
       setGradeDisplay("1");
       setSubmission("1");
@@ -352,6 +352,48 @@ export default function QuizEditor() {
             </Form.Group>
             </Card>
 
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+              <button>Preview</button>
+              <button>Edit</button>
+            </div>
+
+            <Card>
+            <h1>{title}</h1>
+            <p style={{ textAlign: 'center' }}>Quiz Type: {quizType}</p>
+            <p style={{ textAlign: 'center' }}>Points: {points}</p>
+            <p style={{ textAlign: 'center' }}>Assignment Group: {assignmentGroup}</p>
+            <p style={{ textAlign: 'center' }}>Shuffle Answers: {shuffle}</p>
+            <p style={{ textAlign: 'center' }}>Time Limit: {timeLimit}</p>
+            <p style={{ textAlign: 'center' }}>Multiple Attempts: {multipleAttempt}</p>
+            <p style={{ textAlign: 'center' }}>View Responses: {quizType}</p>
+            <p style={{ textAlign: 'center' }}>One Question at a Time: Yes</p>
+            <p style={{ textAlign: 'center' }}>Require Respondus LockDown Browser: No</p>
+            <p style={{ textAlign: 'center' }}>Require to View Quiz Results: No</p>
+            <p style={{ textAlign: 'center' }}>WebCam Required: No</p>
+            <p style={{ textAlign: 'center' }}>Lock Question After Answering:No</p>
+
+
+            <div id="wd-tables">
+        <table border={1} width="100%">
+          <thead>
+            <tr>
+              <th>Due</th>
+              <th>For</th>
+              <th>Available From</th>
+              <th>Until</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{dueDate}</td>
+              <td>Everyone</td>
+              <td>{availableDate}</td>
+              <td>{availableUntil}</td>
+              </tr>
+          </tbody>
+        </table>
+      </div>
+      </Card>
 
 
         </div>
