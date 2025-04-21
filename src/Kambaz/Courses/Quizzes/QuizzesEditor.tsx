@@ -1,33 +1,46 @@
 import { Form, Row, Col } from "react-bootstrap";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import QuizDetailNavigation from "./QuizDetailNavigation";
 import Card from 'react-bootstrap/Card';
 import InputGroup from 'react-bootstrap/InputGroup';
 import { FaCalendarAlt } from "react-icons/fa";
+import { Editor } from 'react-draft-wysiwyg';
+import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
 import { useDispatch, useSelector } from "react-redux";
-import { updateAssignment, addAssignment } from "./reducer";
+import { updateQuiz, addQuiz } from "./reducer";
 import { v4 as uuidv4 } from "uuid";
 import { useState, useEffect } from "react";
 
 import * as coursesClient from "../client";
-import * as assignmentsClient from "./client";
+import * as quizzesClient from "./client";
 
-export default function AssignmentEditor() {
-  const { cid, aid } = useParams();
+export default function QuizEditor() {
+  const { cid, qid } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { assignments } = useSelector((state: any) => state.assignmentsReducer);
-  const assignment = assignments.find((a:any) => a._id === aid);
+  const { quizzes } = useSelector((state: any) => state.quizzesReducer);
+  const quiz = quizzes.find((a:any) => a._id === qid);
 
-  const [name, setName] = useState(assignment?.name || "");
-  const [title, setTitle] = useState(assignment?.title || "");
-  const [description, setDescription] = useState(assignment?.description || "");
-  const [points, setPoints] = useState(assignment?.points || 100);
-  const [dueDate, setDueDate] = useState(assignment?.dueDate || "");
-  const [availableDate, setAvailableDate] = useState(assignment?.availableDate || "");
-  const [availableUntil, setAvailableUntil] = useState(assignment?.availableUntil || "");
-  const [assignmentGroup, setAssignmentGroup] = useState(assignment?.assignmentGroup || "assignment");
-  const [gradeDisplay, setGradeDisplay] = useState(assignment?.gradeDisplay || "percentage");
-  const [submission, setSubmission] = useState(assignment?.submission || "online");
+  const [name, setName] = useState(quiz?.name || "");
+  const [title, setTitle] = useState(quiz?.title || "");
+  const [editorState, setEditorState] = useState(() => {
+    try {
+      if (quiz?.description) {
+        return EditorState.createWithContent(convertFromRaw(JSON.parse(quiz.description)));
+      }
+    } catch (e) {
+      console.error('Error parsing description', e);
+    }
+    return EditorState.createEmpty();
+  });
+  const [points, setPoints] = useState(quiz?.points || 100);
+  const [dueDate, setDueDate] = useState(quiz?.dueDate || "");
+  const [availableDate, setAvailableDate] = useState(quiz?.availableDate || "");
+  const [availableUntil, setAvailableUntil] = useState(quiz?.availableUntil || "");
+  const [quizGroup, setQuizGroup] = useState(quiz?.quizGroup || "quiz");
+  const [gradeDisplay, setGradeDisplay] = useState(quiz?.gradeDisplay || "percentage");
+  const [submission, setSubmission] = useState(quiz?.submission || "online");
   const initialEntry = {
     textEntry: false,
     websiteURL: false,
@@ -35,24 +48,24 @@ export default function AssignmentEditor() {
     studentAnnotation: false,
     fileUploads: false,
   }
-  const [entry, setEntry] = useState(assignment?.entry || initialEntry);
+  const [entry, setEntry] = useState(quiz?.entry || initialEntry);
   
 
   useEffect(() => {
-    if (aid === "new") {
+    if (qid === "new") {
       setName("")
       setTitle("");
-      setDescription("");
+      setEditorState(EditorState.createEmpty());
       setPoints(100);
       setDueDate("");
       setAvailableDate("");
       setAvailableUntil("");
-      setAssignmentGroup("assignment");
+      setQuizGroup("quiz");
       setGradeDisplay("percentage");
       setSubmission("online");
       setEntry(initialEntry);
     }
-  }, [aid]);
+  }, [qid]);
 
   const handleEntryChange = (option:any) => {
     setEntry((prevEntry:any) => ({
@@ -63,63 +76,66 @@ export default function AssignmentEditor() {
 
   const handleSave = async () => {
     if (!cid) return;
-    const assignmentData = {
-      _id: aid === "new" ? uuidv4() : aid,
+    const QuizData = {
+      _id: qid === "new" ? uuidv4() : qid,
       name,
       title,
-      description,
+      description: JSON.stringify(convertToRaw(editorState.getCurrentContent())),
       points,
       dueDate: dueDate,
       availableDate: availableDate,
       availableUntil: availableUntil,
       course: cid,
       gradeDisplay: gradeDisplay,
-      assignmentGroup: assignmentGroup,
+      quizGroup: quizGroup,
       submission: submission,
       entry: entry,
     };
 
-    if (aid === "new") {
-      const assignment = await coursesClient.createAssignmentForCourse(cid, assignmentData);
-      dispatch(addAssignment(assignment));
+    if (qid === "new") {
+      const quiz = await coursesClient.createQuizForCourse(cid, QuizData);
+      dispatch(addQuiz(quiz));
     } else {
-      await assignmentsClient.updateAssignment(assignmentData);
-      dispatch(updateAssignment(assignmentData));
+      await quizzesClient.updateQuiz(QuizData);
+      dispatch(updateQuiz(QuizData));
     }
 
-    navigate(`/Kambaz/Courses/${cid}/Assignments`);
+    navigate(`/Kambaz/Courses/${cid}/quizzes`);
   };
 
   const handleCancel = () => {
-    navigate(`/Kambaz/Courses/${cid}/Assignments`);
+    navigate(`/Kambaz/Courses/${cid}/quizzes`);
   };
   
+
   return (
     <div>
+      <QuizDetailNavigation />
       <div style={{ width: '1100px' }}>
-        <Form.Group className="mb-3 col-6" controlId="AssignmentName">
-          <Form.Label className="mtext-muted">Assignment Name</Form.Label>
+        <Form.Group className="mb-3 col-6" controlId="QuizName">
+          <Form.Label className="mtext-muted">Quiz Name</Form.Label>
           <Form.Control
             type="text"
-            placeholder="Please input Assignment Name"
+            placeholder="Please input Quiz Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-          <Form.Label className="mtext-muted">Assignment Title</Form.Label>
+          <Form.Label className="mtext-muted">Quiz Title</Form.Label>
           <Form.Control
             type="text"
-            placeholder="Please input Assignment Name"
+            placeholder="Please input Quiz Name"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
         </Form.Group>
-        <Form.Group className="mb-3 col-6" controlId="AssignmentDescription">
-          <Form.Control
-            as="textarea"
-            rows={10}
-            placeholder="Please write assignment description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+        <Form.Group className="mb-3 col-6" controlId="QuizDescription">
+          <Editor
+            editorState={editorState}
+            onEditorStateChange={setEditorState}
+            wrapperClassName="border rounded p-2"
+            editorClassName="px-2"
+            toolbarClassName="border-bottom"
+            placeholder="Please write quiz description"
           />
         </Form.Group>
       </div>
@@ -140,12 +156,11 @@ export default function AssignmentEditor() {
 
         <Row className="mb-3">
                 <Col className="col-2">
-                    <Form.Label className="col-form-label float-end">Assignment Group</Form.Label>
+                    <Form.Label className="col-form-label float-end">Quiz Group</Form.Label>
                 </Col>
                 <Col className="col-4">
-                    <Form.Select value={assignmentGroup} 
-                     onChange={(e) => setAssignmentGroup(e.target.value)}>
-                        <option value="assignment">Assignment</option>
+                    <Form.Select value={quizGroup} 
+                     onChange={(e) => setQuizGroup(e.target.value)}>
                         <option value="quiz">Quiz</option>
                         <option value="exam">Exam</option>
                     </Form.Select>
@@ -212,7 +227,7 @@ export default function AssignmentEditor() {
                   type="text"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  placeholder="Assignment Due Date"
+                  placeholder="Quiz Due Date"
                 />
                 <InputGroup.Text><FaCalendarAlt className="fs-6" /></InputGroup.Text>
               </InputGroup>
@@ -253,15 +268,14 @@ export default function AssignmentEditor() {
           <Col className="col-4"></Col>
           <Col className="col-2">
             <Link
-              to={`/Kambaz/Courses/${cid}/Assignments`}
+              to={`/Kambaz/Courses/${cid}/quizzes`}
               className="btn btn-light text-decoration-none me-3"
               onClick={handleCancel}
             >
               Cancel
             </Link>
             <Link
-              to={`/Kambaz/Courses/${cid}/Assignments`}
-              className="btn btn-danger text-decoration-none"
+              to={`/Kambaz/Courses/${cid}/quizzes`}
               onClick={handleSave}
             >
               Save

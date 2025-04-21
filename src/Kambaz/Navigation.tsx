@@ -21,7 +21,7 @@ export default function KambazNavigation() {
       <ListGroup id="wd-kambaz-navigation" style={{width: 120}}
            className="rounded-0 position-fixed bottom-0 top-0 d-none d-md-block bg-black z-2">
         <ListGroup.Item id="wd-neu-link" target="_blank" href="https://www.northeastern.edu/"
-          action className="bg-black border-0 text-center">
+          action className="bg-black border- text-center">
           <img src="/images/NEU.png" width="75px" /></ListGroup.Item>
         <ListGroup.Item as={Link} to="/Kambaz/Account" className={`text-center border-0 bg-black
               ${pathname.includes("Account") ? "bg-white text-danger" : "bg-black text-white"}`}>
@@ -30,7 +30,7 @@ export default function KambazNavigation() {
           Account
         </ListGroup.Item>
         {links.map((link) => (
-          <ListGroup.Item key={link.path} as={Link} to={link.path} className={`bg-black text-center border-0
+          <ListGroup.Item key={link.path} as={Link} to={link.path} className={`bg-yellow text-center border-0
                 ${pathname.includes(link.label) ? "text-danger bg-white" : "text-white bg-black"}`}>
             {link.icon({ className: "fs-1 text-danger"})}
             <br />

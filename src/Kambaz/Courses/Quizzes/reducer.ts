@@ -1,21 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
-// import { assignments } from "../../Database";
 import { v4 as uuidv4 } from "uuid";
 
 const initialState = {
   quizzes: [],
-  currentUser: null,
 };
 const quizzesSlice = createSlice({
   name: "quizzes",
   initialState,
   reducers: {
-    setQuizzes: (state, action) => {
-      state.quizzes = action.payload;
-    },
-
-    setCurrentUser: (state, action) => {
-      state.currentUser = action.payload;
+    setQuizzes: (state,  { payload: quizzes }) => {
+      state.quizzes = quizzes
     },
 
     addQuiz: (state, { payload: quiz }) => {
@@ -30,7 +24,7 @@ const quizzesSlice = createSlice({
         availableDate: quiz.availableDate,
         availableUntil: quiz.availableUntil,
         gradeDisplay: quiz.gradeDisplay,
-        assignmentGroup: quiz.assignmentGroup,
+        quizGroup: quiz.quizGroup,
         submission: quiz.submission,
         entry: quiz.entry,
       };

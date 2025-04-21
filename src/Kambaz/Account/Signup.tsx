@@ -20,11 +20,15 @@ export default function Signup() {
              className="wd-username mb-2 " placeholder="username" />
       <FormControl value={user.password} onChange={(e) => setUser({ ...user, password: e.target.value })}
              className="wd-password mb-2" placeholder="password" type="password"/>
-      <label  htmlFor="wd-select-one-genre"> Role: </label><br/>
-      <select id="wd-select-one-genre">
-        <option value="Faculty">Faculty</option>
-        <option value="Student">Student</option>
-      </select>
+      <FormControl
+        as="select"
+        defaultValue="STUDENT"
+        onChange={(e) => setUser({ ...user, role: e.target.value })}
+        className="wd-role mb-2"
+      >
+        <option value="STUDENT">STUDENT</option>
+        <option value="FACULTY">FACULTY</option>
+      </FormControl>
       <button onClick={signup} className="wd-signup-btn btn btn-primary mb-2 w-100"> Sign up </button><br />
       <Link to="/Kambaz/Account/Signin" className="wd-signin-link">Sign in</Link>
     </div>

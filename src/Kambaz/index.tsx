@@ -7,7 +7,7 @@ import Courses from "./Courses";
 import "./styles.css";
 import ProtectedRoute from "./Account/ProtectedRoute";
 import * as userClient from "./Account/client";
-import * as courseClient from "./Courses/client";
+import * as coursesClient from "./Courses/client";
 import * as enrollmentClient from "./client"
 
 import { useSelector } from "react-redux";
@@ -44,7 +44,7 @@ export default function Kambaz() {
 
   const fetchAllCourses = async () => {
     try {
-      const courses = await courseClient.fetchAllCourses();
+      const courses = await coursesClient.fetchAllCourses();
       setAllCourses(courses);
     } catch (error) {
       console.error(error);
@@ -72,13 +72,13 @@ export default function Kambaz() {
     setCourse({...course, name: "", description: "" });
   }; */
   const handleAddCourse = async () => {
-    const newCourse = await userClient.createCourse(course);
+    const newCourse = await coursesClient.createCourse(course);
     setCourses([ ...courses, newCourse ]);
     triggerRefresh();
   };
 
   const handleDeleteCourse = async (courseId: string) => {
-      const status = await courseClient.deleteCourse(courseId);
+      const status = await coursesClient.deleteCourse(courseId);
       if (status === 200) {
         setCourses(courses.filter((course) => course._id !== courseId));
       } else {
@@ -88,7 +88,7 @@ export default function Kambaz() {
     };
 
   const handleUpdateCourse =  async () => {
-    await courseClient.updateCourse(course);
+    await coursesClient.updateCourse(course);
     setCourses(courses.map((c) => {
       if (c._id === course._id) { return course; }
       else { return c; }
@@ -141,4 +141,3 @@ export default function Kambaz() {
     </Session>
   );
 }
-

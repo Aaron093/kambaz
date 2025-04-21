@@ -105,7 +105,7 @@ export default function Dashboard({ allCourses, courses, course, enrollments, se
         <Col>
           <button className="btn btn-lg btn-primary float-end"
                         onClick={() => setShowFilteredCourses(!showFilteredCourses)} >
-                        Enrollment
+                        {showFilteredCourses ? "My Courses" : "All Courses"}
           </button>
         </Col>
       </Row>
@@ -122,6 +122,8 @@ export default function Dashboard({ allCourses, courses, course, enrollments, se
             return (
               <Col className="wd-dashboard-course" style={{ width: "300px" }}>
                 <Card>
+                <Link to={`/Kambaz/Courses/${course._id}/Home`}
+                        className="wd-dashboard-course-link text-decoration-none text-dark" >
                   <Card.Img src="/images/reactjs.jpg" variant="top" width="100%" height={160} />
                   <Card.Body className="card-body">
                     <Card.Title className="wd-dashboard-course-title text-nowrap overflow-hidden">
@@ -157,6 +159,7 @@ export default function Dashboard({ allCourses, courses, course, enrollments, se
                       </button>
                     )}
                   </Card.Body>
+                  </Link>
                 </Card>
               </Col>
             );
