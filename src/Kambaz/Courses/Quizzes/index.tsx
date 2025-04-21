@@ -57,8 +57,9 @@ export default function Quizzes() {
 
       {quizzes.map((quiz:any) => (
         <ListGroup className="wd-quizzes-details rounded-0" style={{ borderLeft: '3px solid green' }} >
-          <Link to={`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}`} className="text-decoration-none">
+          
           <ListGroup.Item className="wd-quizzes-detail p-3 ps-1 d-flex">
+            <Link to={`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}`} className="text-decoration-none text-reset d-flex flex-grow-1">
               <BsGripVertical className="me-3 fs-3 align-self-center" />
               <MdEditDocument className="me-3 fs-3 text-success align-self-center"/>
             <div >
@@ -80,13 +81,14 @@ export default function Quizzes() {
                   {quiz.points!=="" ? quiz.points : " Unreleased"}
                 </span></p>
             </div>
+            </Link>
             <div className="d-flex align-self-center ms-auto">
               <QuizzesSubControlButtons 
                 quizId={quiz._id}
                 deleteQuiz={(quizId) => removeQuiz(quizId)}/>
             </div>
           </ListGroup.Item>
-          </Link>
+
         </ListGroup>))}
         </ListGroup.Item>
       </ListGroup>
