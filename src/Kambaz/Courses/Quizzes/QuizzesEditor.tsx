@@ -1,4 +1,4 @@
-import { Form, Row, Col } from "react-bootstrap";
+import { Form, Row, Col, Button } from "react-bootstrap";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import QuizDetailNavigation from "./QuizDetailNavigation";
 import Card from 'react-bootstrap/Card';
@@ -14,6 +14,8 @@ import { useState, useEffect } from "react";
 
 import * as coursesClient from "../client";
 import * as quizzesClient from "./client";
+import { TiCancel } from "react-icons/ti";
+import { BsThreeDotsVertical } from "react-icons/bs";
 
 export default function QuizEditor() {
   const { cid, qid } = useParams();
@@ -22,7 +24,6 @@ export default function QuizEditor() {
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
   const quiz = quizzes.find((a:any) => a._id === qid);
 
-  const [name, setName] = useState(quiz?.name || "");
   const [title, setTitle] = useState(quiz?.title || "");
   const [editorState, setEditorState] = useState(() => {
     try {
@@ -35,10 +36,15 @@ export default function QuizEditor() {
     return EditorState.createEmpty();
   });
   const [points, setPoints] = useState(quiz?.points || 100);
+  const [quizType, setQuizType] = useState(quiz?.quizType || "Graded Quiz");
   const [dueDate, setDueDate] = useState(quiz?.dueDate || "");
   const [availableDate, setAvailableDate] = useState(quiz?.availableDate || "");
   const [availableUntil, setAvailableUntil] = useState(quiz?.availableUntil || "");
   const [quizGroup, setQuizGroup] = useState(quiz?.quizGroup || "quiz");
+  const [shuffle, setShuffle] = useState(quiz?.shuffle || "Yes");
+  const [timeLimit, setTimeLimit] = useState(quiz?.timeLimit || 20);
+  const [multipleAttempt, setMultipleAttempt] = useState(quiz?.multipleAttempt || "No");
+  const [assign, setAssign] = useState(quiz?.assign || "Everyone");
   const [gradeDisplay, setGradeDisplay] = useState(quiz?.gradeDisplay || "percentage");
   const [submission, setSubmission] = useState(quiz?.submission || "online");
   const initialEntry = {
@@ -53,10 +59,10 @@ export default function QuizEditor() {
 
   useEffect(() => {
     if (qid === "new") {
-      setName("")
       setTitle("");
       setEditorState(EditorState.createEmpty());
       setPoints(100);
+      setQuizType("Graded Quiz");
       setDueDate("");
       setAvailableDate("");
       setAvailableUntil("");
@@ -64,24 +70,21 @@ export default function QuizEditor() {
       setGradeDisplay("percentage");
       setSubmission("online");
       setEntry(initialEntry);
+      setShuffle("Yes");
+      setTimeLimit("20")
+      setMultipleAttempt("No");
+      setAssign("Everyone");
     }
   }, [qid]);
-
-  const handleEntryChange = (option:any) => {
-    setEntry((prevEntry:any) => ({
-      ...prevEntry,
-      [option]: !prevEntry[option],
-    }));
-  };
 
   const handleSave = async () => {
     if (!cid) return;
     const QuizData = {
       _id: qid === "new" ? uuidv4() : qid,
-      name,
       title,
       description: JSON.stringify(convertToRaw(editorState.getCurrentContent())),
       points,
+      quizType: quizType,
       dueDate: dueDate,
       availableDate: availableDate,
       availableUntil: availableUntil,
@@ -90,6 +93,10 @@ export default function QuizEditor() {
       quizGroup: quizGroup,
       submission: submission,
       entry: entry,
+      Shuffle: shuffle,
+      timeLimit: timeLimit,
+      multipleAttempt: multipleAttempt,
+      assign: assign,
     };
 
     if (qid === "new") {
@@ -103,6 +110,18 @@ export default function QuizEditor() {
     navigate(`/Kambaz/Courses/${cid}/quizzes`);
   };
 
+  const handleShuffleChange = () => {
+    setShuffle((prevShuffle: boolean) => !prevShuffle);
+  };
+
+  const handleAttemptChange = () => {
+    setMultipleAttempt((prevAttempt: boolean) => !prevAttempt);
+  };
+
+  const handleTimeLimitChange = () => {
+    setTimeLimit((prevTimeLimit: boolean) => !prevTimeLimit);
+  };
+
   const handleCancel = () => {
     navigate(`/Kambaz/Courses/${cid}/quizzes`);
   };
@@ -110,24 +129,25 @@ export default function QuizEditor() {
 
   return (
     <div>
+      <div style={{ marginLeft: "350px" }}>
+        <span>Points {points}</span>
+        <TiCancel style={{ marginLeft: "30px" }}/>
+          Not Published 
+        <Button style={{ marginLeft: "30px" }}>
+          <BsThreeDotsVertical size={20} />
+        </Button>
+      </div>
       <QuizDetailNavigation />
       <div style={{ width: '1100px' }}>
-        <Form.Group className="mb-3 col-6" controlId="QuizName">
-          <Form.Label className="mtext-muted">Quiz Name</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Please input Quiz Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <Form.Label className="mtext-muted">Quiz Title</Form.Label>
+      <hr className="m-3" style={{ width: "600px" }} />
+      <Form.Group className="mb-3 col-6" controlId="QuizName">
           <Form.Control
             type="text"
             placeholder="Please input Quiz Name"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
-        </Form.Group>
+          </Form.Group>
         <Form.Group className="mb-3 col-6" controlId="QuizDescription">
           <Editor
             editorState={editorState}
@@ -141,17 +161,19 @@ export default function QuizEditor() {
       </div>
 
       <div style={{ width: "1100px" }}>
-        <Row className="mb-3">
-          <Col className="col-2">
-            <Form.Label className="col-form-label float-end">Points</Form.Label>
-          </Col>
-          <Col className="col-4">
-            <Form.Control
-              type="number"
-              value={points}
-              onChange={(e) => setPoints(parseInt(e.target.value))}
-            />
-          </Col>
+      <Row className="mb-3">
+                <Col className="col-2">
+                    <Form.Label className="col-form-label float-end">Quiz Type</Form.Label>
+                </Col>
+                <Col className="col-4">
+                    <Form.Select value={quizType} 
+                     onChange={(e) => setQuizType(e.target.value)}>
+                        <option value="1">Graded Quiz</option>
+                        <option value="2">Practice Quiz</option>
+                        <option value="3">Graded Survey</option>
+                        <option value="4">Ungraded Survey</option>
+                    </Form.Select>
+                </Col>
         </Row>
 
         <Row className="mb-3">
@@ -163,56 +185,37 @@ export default function QuizEditor() {
                      onChange={(e) => setQuizGroup(e.target.value)}>
                         <option value="quiz">Quiz</option>
                         <option value="exam">Exam</option>
+                        <option value="assignment">ASSIGNMENT</option>
+                        <option value="project">PROJECT</option>
                     </Form.Select>
                 </Col>
         </Row>
 
-        <Row className="mb-3">
-            <Col className="col-2 float-end">
-                <Form.Label className="col-form-label float-end">Display Grade as</Form.Label>
-            </Col>
-            <Col className="col-4">
-                <Form.Select value={gradeDisplay}
-                 onChange={(e) => setGradeDisplay(e.target.value)}>
-                    <option value="percentage">Percentage</option>
-                    <option value="points">Points</option>
-                    <option value="level">Level</option>
-                </Form.Select>
-            </Col>
-        </Row>
+        <p>Options</p>
 
-        <Row className="mb-3">
-            <Col className="col-2">
-                <Form.Label className="col-form-label float-end">Submission Type</Form.Label>
-            </Col>
-            <Col className="col-4">
-                <Card className="p-2">
-                    <Form.Select className="mb-3" value={submission}
-                     onChange={(e) => setSubmission(e.target.value)}>
-                        <option value="online">Online</option>
-                        <option value="offline">Offline</option>
-                        <option value="none">No Submission needed</option>
-                    </Form.Select>
-                    <h6 className="fw-bold mb-3">Online Entry Options</h6>
-                    <Form.Check className="mb-3" label="Text Entry"
-                    checked={entry.textEntry} 
-                    onChange={() => handleEntryChange("textEntry")}/>
-                    <Form.Check className="mb-3" label="Website URL"
-                    checked={entry.websiteURL} 
-                    onChange={() => handleEntryChange("websiteURL")}/>
-                    <Form.Check className="mb-3" label="Media Recordings"
-                    checked={entry.mediaRecordings} 
-                    onChange={() => handleEntryChange("mediaRecordings")}/>
-                    <Form.Check className="mb-3" label="Student Annotation"
-                    checked={entry.studentAnnotation} 
-                    onChange={() => handleEntryChange("studentAnnotation")}/>
-                    <Form.Check className="mb-3" label="File Uploads"
-                    checked={entry.fileUploads} 
-                    onChange={() => handleEntryChange("fileUploads")}/>
+          <Form.Check
+            type="checkbox"
+            id="shuffle-checkbox"
+            label={`Shuffle Answers`}
+            checked={shuffle}
+            onChange={handleShuffleChange}
+          />
 
-                </Card>
-            </Col>
-        </Row>
+          <Form.Check
+            type="checkbox"
+            id="timeLimit-checkbox"
+            label={`Time Limit`}
+            checked={timeLimit}
+            onChange={handleTimeLimitChange}
+          />
+
+          <Form.Check
+            type="checkbox"
+            id="multipleAttempts-checkbox"
+            label={`Allow Multiple Attempts`}
+            checked={multipleAttempt}
+            onChange={handleAttemptChange}
+          />
 
         <Row className="mb-3">
           <Col className="col-2">
@@ -220,7 +223,14 @@ export default function QuizEditor() {
           </Col>
           <Col className="col-4">
             <Card className="p-2">
-              
+            <h6 className="fw-bold mb-0">Assign to</h6>
+              <InputGroup className="mb-3">
+                <Form.Control
+                  type="text"
+                  value={assign}
+                  placeholder="Everyone"
+                />
+              </InputGroup>
               <h6 className="fw-bold mb-0">Due</h6>
               <InputGroup className="mb-3">
                 <Form.Control
