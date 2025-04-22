@@ -375,8 +375,6 @@ export default function Details() {
             <div className="float-end mx-2">
                 <button className="btn btn-sm btn-secondary mx-2"
                     onClick={() => { navigate(`/Kambaz/Courses/${cid}/Quizzes`) }}>Cancel</button>
-                <button className="btn btn-sm btn-primary mx-2"
-                    onClick={() => { handleNavigateToQuestions(); }}>Next: Edit Questions</button>
                 <button className="btn btn-sm btn-success"
                     onClick={() => { updateGlobalQuiz(); }}>Save</button>
             </div>
