@@ -1,9 +1,8 @@
 import { useState } from "react";
+import { Dropdown } from "react-bootstrap";
 import { IoEllipsisVertical } from "react-icons/io5";
-import { FaTrash } from "react-icons/fa";
-import GreenCheckmark from "./GreenCheckmark";
+import { FaTrash, FaCheck } from "react-icons/fa";
 import DeleteComfirmation from "./DeleteComfirmation";
-
 
 export default function QuizzesSubControlButtons(
   {quizId, deleteQuiz}:
@@ -19,15 +18,32 @@ export default function QuizzesSubControlButtons(
 
   return (
     <div className="float-end d-flex align-items-center">
-      <FaTrash className="text-danger me-2 mb-1"
-       onClick={(event)=>{
-        event.preventDefault();
-        handleShow()}}/>
+      <Dropdown>
+
+        <Dropdown.Toggle variant="secondary" size="lg" id="wd-publish-all-btn">
+          <IoEllipsisVertical className="fs-4" />
+        </Dropdown.Toggle>
+
+        <Dropdown.Menu>
+          <Dropdown.Item onClick={(event) => {
+            event.preventDefault();
+            handleShow();
+          }}>
+            <FaTrash className="text-danger me-2" />
+            Delete
+          </Dropdown.Item>
+          <Dropdown.Item>
+            <FaCheck className="text-success me-2" />
+            Publish
+          </Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
+      
       <DeleteComfirmation
-       show={show}
-       handleClose={handleClose} 
-       dialogTitle="Delete Quiz"
-       deleteQuiz={handleConfirmDelete} />
-      <GreenCheckmark />
-      <IoEllipsisVertical className="fs-4" />
-    </div> );}
+        show={show}
+        handleClose={handleClose} 
+        dialogTitle="Delete Quiz"
+        deleteQuiz={handleConfirmDelete} />
+    </div>
+  );
+}
