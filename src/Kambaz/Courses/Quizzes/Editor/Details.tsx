@@ -90,7 +90,7 @@ export default function Details() {
 
     useEffect(() => {
         if (qid !== "New") {
-            fetchQuizById(qid);
+            fetchQuizById(qid!);
         }
     }, [qid]);
 

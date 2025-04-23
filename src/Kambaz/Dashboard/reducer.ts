@@ -15,7 +15,6 @@ const enrollmentsSlice = createSlice({
           (enrollment: any) => enrollment.user === userId && enrollment.course === courseId
         );
         if (enrollmentIndex >= 0) {
-          // Unenroll if already enrolled
           state.enrollments.splice(enrollmentIndex, 1);
         } else {
             const newEnrollement: any = {
